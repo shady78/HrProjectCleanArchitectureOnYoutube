@@ -1,0 +1,14 @@
+Input Validation
+- Name is required
+- Maximum length is 100
+- Description maximum length is 500
+
+Business Rules
+- Department name must be unique
+- Job title must be unique
+- Entity must exist before update
+
+
+Domain
+Application (Input validation)
+API (rquest , send to Application layer, respone format , status code)
