@@ -1,6 +1,6 @@
 ﻿namespace HRManagement.Domain.Entities
 {
-    public sealed class JobTitle
+    public sealed class JobTitle : BaseAuditEntity
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;

@@ -1,7 +1,16 @@
-using HRManagement.Infrastructure;
-using HRManagement.Application;
-using HRManagement.API.Filters;
+using Serilog;
+using Serilog.Events;
+using Serilog.Extensions.Hosting;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console().CreateBootstrapLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSerilog (
+    (services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration).ReadFrom.Services(services));
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -34,9 +43,35 @@ builder.Services.AddControllers(options =>
  });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 var app = builder.Build();
 
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate =
+    "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.000} ms";
+
+    options.GetLevel =  (httpContext , _,exception)=>
+        exception is not null || 
+        httpContext.Response.StatusCode >= StatusCodes.Status500InternalServerError
+        ? LogEventLevel.Error 
+        : httpContext.Response.StatusCode >= StatusCodes.Status400BadRequest 
+        ? LogEventLevel.Warning : LogEventLevel.Information;
+
+    options.EnrichDiagnosticContext =
+    (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set(
+            "RequestHost",
+            httpContext.Request.Host.Value);
+        diagnosticContext.Set(
+            "RequestScheme",
+            httpContext.Request.Scheme);
+    };
+});
+
+app.UseExceptionHandler();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -50,6 +85,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

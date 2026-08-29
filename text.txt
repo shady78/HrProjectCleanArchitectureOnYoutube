@@ -1,14 +1,35 @@
-Input Validation
-- Name is required
-- Maximum length is 100
-- Description maximum length is 500
+Developer / Operational Logs
 
-Business Rules
-- Department name must be unique
-- Job title must be unique
-- Entity must exist before update
+- Exceptions and stack traces
+- Request path and status code
+- Execution time
+- Technical diagnostics
+- Used by developers and operations
+
+
+Business Audit Logs
+- Who changed an employee?
+- What changed before and after?
+- When was a salary approved?
+- Business history that must not be lost
+
+
+
+
+
+
 
 
 Domain
-Application (Input validation)
-API (rquest , send to Application layer, respone format , status code)
+    No Serilog
+
+Application
+    ILogger<T> abstraction only
+
+Infrastructure
+    DeveloperLogs table migration
+  
+API / Composition Root
+    Serilog configuration
+    Request logging middleware
+    SQL Server sink

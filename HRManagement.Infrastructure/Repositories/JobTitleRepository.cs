@@ -9,7 +9,7 @@
                 .OrderBy(j => j.Title)
                 .ToListAsync(cancellationToken);
         }
-        public async Task<JobTitle> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<JobTitle?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.JobTitles.FirstOrDefaultAsync(j => j.Id == id,cancellationToken);
         }

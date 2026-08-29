@@ -21,13 +21,13 @@ namespace HRManagement.Infrastructure.Repositories
                 .ToListAsync(cancellation);
         }
 
-        public async Task<Department> GetById(int id, bool trackchanges = false, CancellationToken cancellation = default)
+        public async Task<Department?> GetById(int id, bool trackchanges = false, CancellationToken cancellation = default)
         {
             IQueryable<Department> query = _context.Departments;
 
             if (!trackchanges)
             {
-                query.AsNoTracking();
+                query = query.AsNoTracking();
             }
 
             return await query.FirstOrDefaultAsync(
