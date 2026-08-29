@@ -7,7 +7,7 @@ namespace HRManagement.Application.Repositories
         Task<IReadOnlyList<Department>> GetAllAsync(
             CancellationToken cancellation = default);
 
-        Task<Department> GetById(
+        Task<Department?> GetById(
             int id,
             bool trackchanges = false,
             CancellationToken cancellation = default);

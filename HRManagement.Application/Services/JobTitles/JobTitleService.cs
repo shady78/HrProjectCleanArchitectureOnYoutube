@@ -1,10 +1,13 @@
 ﻿using HRManagement.Application.Mappings;
 using HRManagement.Application.Repositories;
-using System.Net.Http.Headers;
+using Microsoft.Extensions.Logging;
 
 namespace HRManagement.Application.Services.JobTitles
 {
-    public class JobTitleService(IJobTitleRepository repository) : IJobTitleService
+    public class JobTitleService(
+        IJobTitleRepository repository,
+        ILogger<JobTitleService> logger) 
+        : IJobTitleService
     {
         public async Task<IReadOnlyList<JobTitleResponse>> GetAllAsync(CancellationToken cancellationToken = default)
         {
@@ -25,12 +28,16 @@ namespace HRManagement.Application.Services.JobTitles
             var normalizedTitle = request.Title.Trim();
             if (await repository.TitleExistsAsync(normalizedTitle,cancellationToken))
             {
+                logger.LogWarning(
+                    $"Job title creation rejected because {normalizedTitle} already exist");
                 return Result<JobTitleResponse>
                     .Failure(JobTitleErrors.DuplicateTitle(normalizedTitle));
             }
             var jobTitle = request.ToEntity();
             await repository.AddAsync(jobTitle, cancellationToken);
             await repository.SaveChangeAsync(cancellationToken);
+            logger.LogInformation($"Job Title {jobTitle.Id} created successfully with" +
+                $"title {jobTitle.Title}");
             return Result<JobTitleResponse>.Success(jobTitle.ToResponse());
         }
 

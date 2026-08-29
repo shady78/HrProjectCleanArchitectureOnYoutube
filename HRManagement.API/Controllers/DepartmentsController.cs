@@ -92,5 +92,12 @@ namespace HRManagement.API.Controllers
 
             return StatusCode(statusCode, response);
         }
+
+        [HttpGet("test-exception")]
+        public IActionResult TestException()
+        {
+            throw new InvalidOperationException("" +
+                "this exception is only for testing.");
+        }
     }
 }
