@@ -8,3 +8,11 @@ global using HRManagement.API.Filters;
 global using HRManagement.API.GlobalHandling;
 global using HRManagement.Application;
 global using HRManagement.Infrastructure;
+global using Serilog;
+global using Serilog.Events;
+
+global using HRManagement.Application.Common.Settings;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.IdentityModel.Tokens;
+global using System.Text;
+

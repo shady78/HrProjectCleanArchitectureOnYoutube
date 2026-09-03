@@ -1,35 +1,29 @@
-Developer / Operational Logs
+Security Module
 
-- Exceptions and stack traces
-- Request path and status code
-- Execution time
-- Technical diagnostics
-- Used by developers and operations
+Authentication vs Authorization
+ASP.NET Core Identity
+Register
+Login
+JWT Access Token
+Protect API Endpoint
+Swagger Authorize
+
+Refresh Token 
+Current User Service
+
+Authorization 
+Role-Based Authorization
+Permission-Based Authorization
+Custom Role
+Assign Permissions to Roles
+
+HasPermission Attribute
+PermissionRequirement
+PermissionAuthorizationHandler
+PermissionPolicyProvider
+IPermissionChecker
+Apply permissions on Departments/ Employees/ JobTitles/ Roles
 
 
-Business Audit Logs
-- Who changed an employee?
-- What changed before and after?
-- When was a salary approved?
-- Business history that must not be lost
-
-
-
-
-
-
-
-
-Domain
-    No Serilog
-
-Application
-    ILogger<T> abstraction only
-
-Infrastructure
-    DeveloperLogs table migration
-  
-API / Composition Root
-    Serilog configuration
-    Request logging middleware
-    SQL Server sink
+use this command to generate secret key for JWT token:
+[Convert]::ToBase64String((1..64 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))

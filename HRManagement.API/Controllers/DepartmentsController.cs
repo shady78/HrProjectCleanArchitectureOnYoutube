@@ -1,14 +1,13 @@
-﻿using HRManagement.API.Common.Responses;
-using HRManagement.Application.Common;
+﻿using HRManagement.Application.Common;
 using HRManagement.Application.DTOs.Departments;
 using HRManagement.Application.Services.Departments;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRManagement.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DepartmentsController(IDepartmentService service) : ControllerBase
     {
 

@@ -1,15 +1,11 @@
-﻿using HRManagement.Domain.Entities;
-using HRManagement.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using HRManagement.Domain.Entities.Identity;
 namespace HRManagement.Infrastructure.Persistence
 {
     public sealed class ApplicationDbContext
         (DbContextOptions<ApplicationDbContext> options)
-        : IdentityDbContext<ApplicationUser>(options)
+        : IdentityDbContext<ApplicaitonUser>(options)
     {
-
 
         public DbSet<Department> Departments => Set<Department>();
         public DbSet<JobTitle> JobTitles => Set<JobTitle>();

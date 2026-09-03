@@ -1,23 +1,47 @@
-using Serilog;
-using Serilog.Events;
-using Serilog.Extensions.Hosting;
+using Microsoft.OpenApi;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console().CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>();
 
-builder.Services.AddSerilog (
-    (services, loggerConfiguration) => loggerConfiguration
-    .ReadFrom.Configuration(builder.Configuration).ReadFrom.Services(services));
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found");
- 
+
+builder.Services.AddInfrastructure(connectionString, builder.Configuration);
+builder.Services.AddSerilog(
+    (services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration).ReadFrom.Services(services));
+
+builder.Services
+  .AddAuthentication(options =>
+  {
+      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  })
+  .AddJwtBearer(options =>
+  {
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = jwtSettings!.Issuer,
+          ValidAudience = jwtSettings.Audience,
+          IssuerSigningKey = new SymmetricSecurityKey(
+          Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+          ClockSkew = TimeSpan.Zero
+      };
+  });
+builder.Services.AddAuthorization();
+
+
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddControllers(options =>
 {
@@ -42,9 +66,27 @@ builder.Services.AddControllers(options =>
      };
  });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter jwt token only. Example: eyjdfddfd..."
+    });
+
+    options.AddSecurityRequirement(d => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", d)] = new List<string>()
+    });
+});
 var app = builder.Build();
 
 app.UseSerilogRequestLogging(options =>
@@ -52,11 +94,11 @@ app.UseSerilogRequestLogging(options =>
     options.MessageTemplate =
     "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.000} ms";
 
-    options.GetLevel =  (httpContext , _,exception)=>
-        exception is not null || 
+    options.GetLevel = (httpContext, _, exception) =>
+        exception is not null ||
         httpContext.Response.StatusCode >= StatusCodes.Status500InternalServerError
-        ? LogEventLevel.Error 
-        : httpContext.Response.StatusCode >= StatusCodes.Status400BadRequest 
+        ? LogEventLevel.Error
+        : httpContext.Response.StatusCode >= StatusCodes.Status400BadRequest
         ? LogEventLevel.Warning : LogEventLevel.Information;
 
     options.EnrichDiagnosticContext =
@@ -75,12 +117,9 @@ app.UseExceptionHandler();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "HR Management API v1");
-        options.DocumentTitle = "HR Management API";
-    });
 }
 
 app.UseHttpsRedirection();

@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using HRManagement.Application.Services.Auth.Interfaces;
+using HRManagement.Application.Services.Auth.Services;
 using HRManagement.Application.Services.Departments;
 using HRManagement.Application.Services.JobTitles;
 using HRManagement.Application.Validators;
@@ -15,6 +17,7 @@ namespace HRManagement.Application
             services.AddScoped<IJobTitleService, JobTitleService>();
             services.AddValidatorsFromAssemblyContaining
                 <CreateDepartmentValidator>();
+            services.AddScoped<IAuthService, AuthService>();
             return services;
         }
     }
