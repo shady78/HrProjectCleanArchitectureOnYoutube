@@ -27,5 +27,23 @@ namespace HRManagement.API.Controllers
                 response,
                 "User logged in successfully."));
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(
+            RefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+            var response = await _authService.RefreshTokenAsync(request, cancellationToken);
+
+            return Ok(ApiResponse<AuthResponse>.Succeeded(
+                response, "Token refreshed successfully."));
+        }
+        [HttpPost("revoke-refresh-token")]
+        public async Task<IActionResult> Revoke(
+            RevokeRefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+             await _authService.RevokeRefreshTokenAsync(request, cancellationToken);
+            return Ok(ApiResponse<AuthResponse>.Succeeded(
+                null!, "Refresh Token revoked successfully."));
+        }
     }
 }

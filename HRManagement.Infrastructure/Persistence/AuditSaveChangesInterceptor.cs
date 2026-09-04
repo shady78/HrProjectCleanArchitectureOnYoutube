@@ -30,10 +30,10 @@ namespace HRManagement.Infrastructure.Persistence
                 return;
             }
             var utcNow = DateTime.UtcNow;
-            var currentUser = currentUserService.GetCurrentUserId();
+            var currentUser = currentUserService.UserId;
 
-            SetAuditFields(context, currentUser, utcNow);
-            var auditLogs = BuildAuditLogs(context, currentUser, utcNow);
+            SetAuditFields(context, currentUser!, utcNow);
+            var auditLogs = BuildAuditLogs(context, currentUser!, utcNow);
             if (auditLogs.Count > 0)
             {
                 context.Set<AuditLog>().AddRange(auditLogs);
@@ -50,12 +50,12 @@ namespace HRManagement.Infrastructure.Persistence
                 if (entry.State == EntityState.Added)
                 {
                     entry.Entity.CreatedAt = utcNow;
-                    entry.Entity.CreatedBy = currentUser;
+                    entry.Entity.CreatedBy = currentUser ?? "System";
                 }
                 if (entry.State == EntityState.Modified)
                 {
                     entry.Entity.UpdatedAt = utcNow;
-                    entry.Entity.UpdatedBy = currentUser;
+                    entry.Entity.UpdatedBy = currentUser ?? "System";
                 }
                 if (entry.State == EntityState.Deleted)
                 {
@@ -63,7 +63,7 @@ namespace HRManagement.Infrastructure.Persistence
                     // Update set IsDeleted = true
                     entry.State = EntityState.Modified;
                     entry.Entity.IsDeleted = true;
-                    entry.Entity.DeletedBy = currentUser;
+                    entry.Entity.DeletedBy = currentUser ?? "System";
                     entry.Entity.DeletedAt = utcNow;
                 }
             }
@@ -101,7 +101,7 @@ namespace HRManagement.Infrastructure.Persistence
                         : GetPrimaryKeyValue(entry),
                     Action = entry.State.ToString(),
                     ChangedAt = utcNow,
-                    ChangedBy = currentUser,
+                    ChangedBy = currentUser ?? "System",
                     Changes = JsonSerializer.Serialize(changes)
                 });
             }

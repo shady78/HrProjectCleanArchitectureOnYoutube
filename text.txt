@@ -10,6 +10,88 @@ Swagger Authorize
 
 Refresh Token 
 Current User Service
+{
+Understand the problem: why an Access Token alone is not enough, and why we need a Refresh Token.
+Build the RefreshToken Entity and associate it with ApplicationUser.
+Prepare the new DTOs (AuthResponse updated + RefreshTokenRequest + RevokeRefreshTokenRequest).
+Update TokenService to generate Refresh Tokens alongside Access Tokens.
+Build IUserRepository to separate EF Core queries from the Application layer.
+(This is a new change added after we discovered that AuthService was directly using EF Core.)
+Build AuthService completely: Login / RefreshToken / RevokeRefreshToken.
+Add new endpoints to AuthController.
+Build CurrentUserService to identify the current user from JWT claims.
+Create the migration and test the complete flow using Swagger or Postman.
+Review the Production Notes.
+}
+
+POST /api/auth/login
+        |
+        v
+AuthController
+        |
+        v
+AuthService.LoginAsync
+        |
+        v
+IUserRepository RefreshTokens get user by email
+        |
+        v
+Check password using Identity (UserManager)
+        |
+        v
+Generate Access Token + Refresh Token
+        |
+        v
+Save Refresh Token in DB
+        |
+        v
+Return AuthResponse
+
+
+
+## Refresh Token Flow
+
+POST /api/auth/refresh-token
+        |
+        v
+AuthController
+        |
+        v
+AuthService.RefreshTokenAsync
+        |
+        v
+IUserRepository RefreshTokens get user by refresh token
+        |
+        v
+Check token is active
+        |
+        v
+Generate new Access Token + new Refresh Token
+        |
+        v
+Revoke old refresh token, Save new refresh token
+        |
+        v
+Return AuthResponse
+
+
+
+
+CurrentUserService Flow
+Client sends JWT
+        |
+        v
+Authentication middleware validates token
+        |
+        v
+HttpContext.User contains claims
+        |
+        v
+CurrentUserService reads UserId / Email
+        |
+        v
+Application Service uses current user
+
 
 Authorization 
 Role-Based Authorization

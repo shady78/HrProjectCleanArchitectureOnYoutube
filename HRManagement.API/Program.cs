@@ -1,3 +1,5 @@
+using HRManagement.API.Services;
+using HRManagement.Application.Common.Interfaces;
 using Microsoft.OpenApi;
 
 Log.Logger = new LoggerConfiguration()
@@ -40,7 +42,8 @@ builder.Services
   });
 builder.Services.AddAuthorization();
 
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddApplication();
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddControllers(options =>
@@ -87,6 +90,7 @@ builder.Services.AddSwaggerGen(options =>
         [new OpenApiSecuritySchemeReference("Bearer", d)] = new List<string>()
     });
 });
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging(options =>

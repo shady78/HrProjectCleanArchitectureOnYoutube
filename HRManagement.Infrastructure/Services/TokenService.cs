@@ -1,14 +1,18 @@
-﻿namespace HRManagement.Infrastructure.Services
+﻿using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
+
+namespace HRManagement.Infrastructure.Services
 {
     public class TokenService : ITokenService
     {
         private readonly JwtSettings _jwtSettings;
         private readonly UserManager<ApplicaitonUser> _userManager;
-
-        public TokenService(IOptions<JwtSettings> jwtSettings, UserManager<ApplicaitonUser> userManager)
+        private readonly IConfiguration _configuration;
+        public TokenService(IOptions<JwtSettings> jwtSettings, UserManager<ApplicaitonUser> userManager, IConfiguration configuration)
         {
             _jwtSettings = jwtSettings.Value;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         public async Task<(string Token, DateTime ExpiresAt)> GenerateAccessTokenAsync(
@@ -25,6 +29,7 @@
                   new(ClaimTypes.NameIdentifier, user.Id),
                   new(ClaimTypes.Email, user.Email!),
                   new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim())
+
             };
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -48,6 +53,19 @@
 
             var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
             return (tokenValue, expiresAt);
+        }
+
+        public RefreshToken GetRefreshToken()
+        {
+            var randomBytes = RandomNumberGenerator.GetBytes(64);
+            var refreshTokenExpiresInDays = int.Parse(
+                _configuration["JwtSettings:RefreshTokenExpiresInDays"]!);
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomBytes),
+                ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiresInDays),
+                CreatedAt = DateTime.UtcNow
+            };
         }
     }
 }

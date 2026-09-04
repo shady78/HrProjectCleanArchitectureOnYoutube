@@ -1,9 +1,4 @@
-﻿using HRManagement.Application.Common;
-using HRManagement.Application.DTOs.Departments;
-using HRManagement.Application.Mappings;
-using HRManagement.Application.Repositories;
-
-namespace HRManagement.Application.Services.Departments
+﻿namespace HRManagement.Application.Services.Departments
 {
     public class DepartmentService(IDepartmentRepository repository) : IDepartmentService
     {
@@ -31,7 +26,9 @@ namespace HRManagement.Application.Services.Departments
             {
                 return Result<DepartmentResponse>.Failure(DepartmentErrors.DuplicateName(normalizedName));
             }
+            //var currentUserId = _currentUser.UserId;
             var department = request.ToEntity();
+            //department.CreatedBy = currentUserId!;
             await repository.AddAsync(department,cancellationToken);
             await repository.SaveChangeAsync(cancellationToken);
 

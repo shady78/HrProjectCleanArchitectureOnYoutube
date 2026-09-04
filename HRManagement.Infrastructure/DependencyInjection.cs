@@ -44,8 +44,7 @@ namespace HRManagement.Infrastructure
 
             services.AddScoped<IDepartmentRepository , DepartmentRepository>();
             services.AddScoped<IJobTitleRepository , JobTitleRepository>();
-            services.AddScoped<ICurrentUserService,CurrentUserService>();
-
+            services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         }

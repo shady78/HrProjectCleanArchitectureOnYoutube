@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using HRManagement.Application.Common.Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
 using System.Diagnostics;
 
 namespace HRManagement.API.GlobalHandling
@@ -12,25 +13,34 @@ namespace HRManagement.API.GlobalHandling
             CancellationToken cancellationToken)
         {
             var traceId = Activity.Current.Id ?? httpContext.TraceIdentifier;
+            var (statusCode, code, message) = exception switch
+            {
+                UnauthorizedException => (
+                StatusCodes.Status401Unauthorized,
+                "Auth.InvalidCredencials",
+                exception.Message),
 
+                _ => (
+                StatusCodes.Status500InternalServerError,
+                "Server.Unexpected",
+                exception.Message)
+            };
             logger.LogError(
                 exception,
                 "Unhandled exception. TraceId: {TraceId}, Method: {Method}," +
                 "Path: {Path}",
                 traceId, httpContext.Request.Method, httpContext.Request.Path);
 
-            httpContext.Response.StatusCode =
-                StatusCodes.Status500InternalServerError;
+            httpContext.Response.StatusCode = statusCode;
             var response = ApiResponse<object?>.Failed(
-                "An unexpected error occured.",
+                message,
                 new[]
                 {
-                new ApiError("Server.Unexpected","Please contact support with the trace Id.",
-                  traceId)
+                new ApiError(code,message,traceId)
                 });
 
             await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
-            return true; 
+            return true;
         }
     }
 }
