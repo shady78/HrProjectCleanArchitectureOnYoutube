@@ -1,9 +1,4 @@
-﻿using HRManagement.Application.Common;
-using HRManagement.Application.DTOs.Departments;
-using HRManagement.Application.Services.Departments;
-using Microsoft.AspNetCore.Authorization;
-
-namespace HRManagement.API.Controllers
+﻿namespace HRManagement.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -11,6 +6,7 @@ namespace HRManagement.API.Controllers
     public class DepartmentsController(IDepartmentService service) : ControllerBase
     {
 
+        [HasPermission(SystemPermissions.Departments.View)]
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken cancellactionToken)
         {
@@ -19,6 +15,7 @@ namespace HRManagement.API.Controllers
                 .Succeeded(departments, "Departments retrieved successfully."));
         }
 
+        [HasPermission(SystemPermissions.Departments.View)]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
@@ -28,6 +25,7 @@ namespace HRManagement.API.Controllers
                 .Succeeded(result.Value!, "Department retrieved successfully."));
         }
 
+        [HasPermission(SystemPermissions.Departments.Create)]
         [HttpPost]
         public async Task<IActionResult> Create(CreateDepartmentRequest request, CancellationToken cancellationToken)
         {
@@ -46,6 +44,7 @@ namespace HRManagement.API.Controllers
                  response);
         }
 
+        [HasPermission(SystemPermissions.Departments.Update)]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, UpdateDepartmentRequest request,CancellationToken cancellationToken)
         {
@@ -58,6 +57,7 @@ namespace HRManagement.API.Controllers
 
         }
 
+        [HasPermission(SystemPermissions.Departments.Delete)]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
@@ -92,11 +92,6 @@ namespace HRManagement.API.Controllers
             return StatusCode(statusCode, response);
         }
 
-        [HttpGet("test-exception")]
-        public IActionResult TestException()
-        {
-            throw new InvalidOperationException("" +
-                "this exception is only for testing.");
-        }
+        
     }
 }

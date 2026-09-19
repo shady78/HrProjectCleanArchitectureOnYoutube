@@ -1,5 +1,9 @@
+using HRManagement.API.Authorization;
 using HRManagement.API.Services;
-using HRManagement.Application.Common.Interfaces;
+using HRManagement.Infrastructure.Persistence;
+using HRManagement.Infrastructure.Persistence.Seeders;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
 Log.Logger = new LoggerConfiguration()
@@ -9,6 +13,10 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>();
 
+builder.Services.AddSingleton<IAuthorizationPolicyProvider,
+    PermissionAuthorizationPolicyProvider>();
+
+builder.Services.AddScoped<IAuthorizationHandler,PermissionAuthorizationHandler>();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -92,6 +100,15 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbcontext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    await dbcontext.Database.MigrateAsync();
+    await PermissionSeeder.SeedAsync(dbcontext);
+}
+
 
 app.UseSerilogRequestLogging(options =>
 {

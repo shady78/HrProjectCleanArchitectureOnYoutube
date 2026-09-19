@@ -1,11 +1,4 @@
-﻿using HRManagement.Application.Common.Exceptions;
-using HRManagement.Application.Common.Interfaces;
-using HRManagement.Application.DTOs.Auth;
-using HRManagement.Application.Services.Auth.Interfaces;
-using HRManagement.Domain.Entities.Identity;
-using Microsoft.AspNetCore.Identity;
-
-namespace HRManagement.Application.Services.Auth.Services
+﻿namespace HRManagement.Application.Services.Auth.Services
 {
     public class AuthService : IAuthService
     {
