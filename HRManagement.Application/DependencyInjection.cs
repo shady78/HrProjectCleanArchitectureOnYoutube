@@ -1,4 +1,6 @@
-﻿namespace HRManagement.Application;
+﻿using HRManagement.Application.Services.UserRoles.Service;
+
+namespace HRManagement.Application;
 
 public static class DependencyInjection
 {
@@ -11,6 +13,7 @@ public static class DependencyInjection
             <CreateDepartmentValidator>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IUserRoleService, UserRoleService>();
         return services;
     }
 }

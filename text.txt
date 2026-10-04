@@ -146,3 +146,10 @@ If not  => 403 Forbidden
 
 use this command to generate secret key for JWT token:
 [Convert]::ToBase64String((1..64 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
+
+
+
+AssignRoleToUser
+RemoveRoleFromUser
+UserRoleService
+UserRolesController
